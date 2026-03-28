@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/simple-envelope-budget/',
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -14,7 +15,7 @@ export default defineConfig({
         background_color: '#111008',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: '/simple-envelope-budget/',
         icons: [
           {
             src: 'favicon.svg',
