@@ -13,6 +13,7 @@ export type RouteName = 'home' | 'log' | 'wishlist' | 'settings';
 export interface ParsedRoute {
   name: RouteName;
   expenseId?: string;
+  prefillDesc?: string;
 }
 
 const viewRootId = 'view-root';
@@ -25,7 +26,7 @@ export function parseHash(): ParsedRoute {
   const id = params.get('id') ?? undefined;
 
   if (path === '/log' || path === '/log/') {
-    return { name: 'log', expenseId: id };
+    return { name: 'log', expenseId: id, prefillDesc: params.get('desc') ?? undefined };
   }
   if (path === '/wishlist' || path === '/wishlist/') {
     return { name: 'wishlist' };
@@ -69,7 +70,7 @@ export async function route(): Promise<void> {
         break;
       case 'log':
         currentCleanup = cleanupLogExpense;
-        await renderLogExpense(root, r.expenseId);
+        await renderLogExpense(root, r.expenseId, r.prefillDesc);
         break;
       case 'wishlist':
         currentCleanup = cleanupWishlist;

@@ -2,6 +2,7 @@ import { addExpense, getExpense, updateExpense } from '../db.ts';
 import type { Expense } from '../types.ts';
 import { dollarsToCents, getToday, getYearMonthFromDate } from '../utils.ts';
 import { navigate } from '../router.ts';
+import { QUICK_CATEGORIES } from '../categories.ts';
 
 export function cleanup(): void {
   /* no-op */
@@ -36,6 +37,7 @@ function monthBounds(ym: string): { min: string; max: string } {
 export async function render(
   container: HTMLElement,
   expenseId?: string,
+  prefillDesc?: string,
 ): Promise<void> {
   const today = getToday();
   const yearMonth = getYearMonthFromDate(today);
@@ -104,6 +106,42 @@ export async function render(
   desc.placeholder = 'Coffee, groceries, ...';
   if (existing) {
     desc.value = existing.description;
+  } else if (prefillDesc) {
+    desc.value = prefillDesc;
+  }
+
+  const quickRow = el('div', { className: 'quick-tap' });
+  if (!existing) {
+    const chipButtons: HTMLButtonElement[] = [];
+
+    function syncChipHighlight(): void {
+      const current = desc.value.trim().toLowerCase();
+      for (const cb of chipButtons) {
+        const matches = cb.dataset.cat?.toLowerCase() === current;
+        cb.classList.toggle('quick-tap__btn--active', matches);
+      }
+    }
+
+    for (const cat of QUICK_CATEGORIES) {
+      const btn = el('button', { className: 'quick-tap__btn' });
+      btn.type = 'button';
+      btn.dataset.cat = cat.label;
+      const iconSpan = el('span', { className: 'quick-tap__icon' });
+      iconSpan.innerHTML = cat.icon;
+      const labelSpan = el('span', { className: 'quick-tap__label', text: cat.label });
+      btn.appendChild(iconSpan);
+      btn.appendChild(labelSpan);
+      btn.addEventListener('click', () => {
+        const isActive = desc.value.trim().toLowerCase() === cat.label.toLowerCase();
+        desc.value = isActive ? '' : cat.label;
+        syncChipHighlight();
+      });
+      chipButtons.push(btn);
+      quickRow.appendChild(btn);
+    }
+
+    if (prefillDesc) syncChipHighlight();
+    desc.addEventListener('input', syncChipHighlight);
   }
 
   const dateLabel = el('label', { text: 'Date' });
@@ -133,6 +171,7 @@ export async function render(
   actions.appendChild(cancel);
   actions.appendChild(submit);
 
+  if (quickRow.childElementCount > 0) form.appendChild(quickRow);
   form.appendChild(descLabel);
   form.appendChild(desc);
   form.appendChild(dateLabel);

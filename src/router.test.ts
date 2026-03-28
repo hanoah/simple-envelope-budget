@@ -29,4 +29,19 @@ describe('parseHash', () => {
     window.location.hash = '#/settings';
     expect(parseHash().name).toBe('settings');
   });
+
+  it('parses log with desc param', () => {
+    window.location.hash = '#/log?desc=Groceries';
+    const r = parseHash();
+    expect(r.name).toBe('log');
+    expect(r.prefillDesc).toBe('Groceries');
+    expect(r.expenseId).toBeUndefined();
+  });
+
+  it('returns undefined prefillDesc when no desc param', () => {
+    window.location.hash = '#/log';
+    const r = parseHash();
+    expect(r.name).toBe('log');
+    expect(r.prefillDesc).toBeUndefined();
+  });
 });

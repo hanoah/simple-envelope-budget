@@ -15,6 +15,7 @@ import {
   STORAGE_LAST_EXPORT,
 } from '../utils.ts';
 import { navigate } from '../router.ts';
+import { categoryIconFor } from '../categories.ts';
 
 export function cleanup(): void {
   /* no timers/listeners yet */
@@ -199,16 +200,20 @@ export async function render(container: HTMLElement): Promise<void> {
         className: 'expense-list__amount',
         text: formatCurrency(ex.amount),
       });
-      const desc = el('span', {
-        className: 'expense-list__desc',
-        text: ex.description || '\u2014',
-      });
+      const descRow = el('span', { className: 'expense-list__desc' });
+      const catIcon = categoryIconFor(ex.description);
+      if (catIcon) {
+        const iconEl = el('span', { className: 'expense-list__cat-icon' });
+        iconEl.innerHTML = catIcon;
+        descRow.appendChild(iconEl);
+      }
+      descRow.appendChild(document.createTextNode(ex.description || '\u2014'));
       const date = el('span', {
         className: 'expense-list__date',
         text: ex.date,
       });
       left.appendChild(amt);
-      left.appendChild(desc);
+      left.appendChild(descRow);
       left.appendChild(date);
 
       const actions = el('div', { className: 'expense-list__actions' });
